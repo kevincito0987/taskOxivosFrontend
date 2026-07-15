@@ -24,6 +24,8 @@ Para garantizar un estándar visual profesional, limpio y centrado en la convers
 
 Para evitar la típica estructura monolítica y desorganizada de React, esta aplicación se rige por los siguientes principios de ingeniería:  
 
+> 📝 **Inspiración Arquitectónica:** El diseño del sistema y la separación de capas implementadas en este repositorio están inspirados y fundamentados en los conceptos de diseño de sistemas a gran escala presentados en el artículo: [Frontend System Design Patterns for Large-scale React Applications](https://medium.com/@dmitriilobanov3/frontend-system-design-patterns-for-large-scale-react-applications-699ef9bb3b1d) por Dmitrii Lobanov.  
+
 ### 1. Patrón CVVM (Container, View, ViewModel)
 
 - **Containers (`src/containers/`):** Actúan como orquestadores de datos y ciclo de vida de cada pantalla. Se encargan de leer parámetros de rutas (URL State), consumir del contexto global y pasar los datos listos a las vistas.  
