@@ -52,9 +52,9 @@ Plaintext
                                │
                         [ViewModel] (Aplica filtros, ordenamiento y búsquedas de forma pura)
                                │
-                               └── (Retorna: { filteredProducts, totalCount })[cite: 2]
+                               └── (Retorna: { filteredProducts, totalCount })
                                │
-                        [ProductGrid] (Recibe los productos limpios y los renderiza sin lógica interna)[cite: 2]
+                        [ProductGrid] (Recibe los productos limpios y los renderiza sin lógica interna)
 ```
 
 ## 🛠️ Stack Tecnológico
@@ -87,7 +87,7 @@ src/
 │   │   ├── Header.tsx       # Barra de navegación con contador de carrito persistente
 │   │   └── Footer.tsx
 │   │
-│   └── product/             # Componentes específicos del dominio de catálogo (Views)[cite: 2]
+│   └── product/             # Componentes específicos del dominio de catálogo (Views)
 │       ├── ProductCard.tsx  # Tarjeta individual con interactividad y validación de stock
 │       ├── ProductGrid.tsx  # Grid responsivo de productos de 2 a 4 columnas según dispositivo
 │       └── SizeSelector.tsx # Control interactivo de tallas
