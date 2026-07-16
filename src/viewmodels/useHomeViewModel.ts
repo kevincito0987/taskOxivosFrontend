@@ -1,8 +1,11 @@
+// src/viewmodels/useHomeViewModel.ts
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom'; // 👈 Importamos el hook de navegación
 import { PRODUCTS_MOCK } from '../data/products';
 
 export function useHomeViewModel() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const navigate = useNavigate(); // 👈 Inicializamos el navegador
 
   // Simulación de carga asíncrona para lucir los esqueletos
   useEffect(() => {
@@ -19,17 +22,12 @@ export function useHomeViewModel() {
       (product) => (product.rating?.rate ?? 0) >= 4.5
     );
     
-    // Si hay muy pocos con rating alto, tomamos los primeros 4 por defecto
     return highRated.length >= 3 ? highRated.slice(0, 4) : PRODUCTS_MOCK.slice(0, 4);
   }, []);
 
+  // 👈 Ahora redirige físicamente a la página de productos en vez de hacer scroll local
   const handleExploreCatalog = () => {
-    const catalogSection = document.getElementById('catalog');
-    if (catalogSection) {
-      catalogSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.location.hash = 'catalog'; 
-    }
+    navigate('/products');
   };
 
   const handleNewsletterSubmit = (email: string) => {

@@ -1,4 +1,3 @@
-// src/components/product/CartContainer.tsx
 import { useCartViewModel } from '../viewmodels/useCartViewModel';
 import { CartItemList } from '../components/product/CartItemList';
 import { CartSummary } from '../components/product/CartSummary';

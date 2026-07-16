@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, NavLink } from 'react-router-dom'; // 👈 Simplificamos imports (ya no dependemos de navigate aquí)
 import { ShoppingCart, Menu, X, Globe, ChevronRight } from 'lucide-react';
 
 interface HeaderProps {
@@ -53,8 +54,8 @@ export function Header({ cartCount = 0, onCartClick }: HeaderProps) {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
-          {/* Lado Izquierdo: LOGO PREMIUM DE OXIVOS */}
-          <div className="flex items-center gap-3">
+          {/* Lado Izquierdo: LOGO PREMIUM DE OXIVOS (Ahora envuelto en Link '/') */}
+          <Link to="/" className="flex items-center gap-3 group transition-opacity hover:opacity-90">
             {/* Contenedor del Isotipo con Efecto Neón Azul */}
             <div className="h-11 w-11 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.25)] hover:shadow-[0_0_25px_rgba(37,99,235,0.4)] transition-all duration-300">
               <span className="text-base font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
@@ -70,13 +71,35 @@ export function Header({ cartCount = 0, onCartClick }: HeaderProps) {
                 Web Development Agency
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* Centro: MENÚ DE NAVEGACIÓN DESKTOP */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#catalog" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">
+            {/* NavLink activo para la página de Inicio */}
+            <NavLink 
+              to="/" 
+              className={({ isActive }) => 
+                `text-sm font-semibold transition-colors ${
+                  isActive ? 'text-white' : 'text-slate-400 hover:text-white'
+                }`
+              }
+            >
+              Home
+            </NavLink>
+
+            {/* NavLink activo para Store Catalog */}
+            <NavLink 
+              to="/products" 
+              className={({ isActive }) => 
+                `text-sm font-semibold transition-colors ${
+                  isActive ? 'text-white' : 'text-slate-400 hover:text-white'
+                }`
+              }
+            >
               Store Catalog
-            </a>
+            </NavLink>
+
+            {/* Enlaces estáticos */}
             <a href="#services" className="text-sm font-semibold text-slate-400 hover:text-white transition-colors">
               Agency Services
             </a>
@@ -93,21 +116,36 @@ export function Header({ cartCount = 0, onCartClick }: HeaderProps) {
           {/* Lado Derecho: ACCIONES (CARRITO & MENÚ MÓVIL) */}
           <div className="flex items-center gap-4">
             
-            {/* Botón de Carrito con Contador Persistente */}
-            <button
-              onClick={onCartClick}
-              className="relative p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-blue-500/50 hover:bg-slate-900 text-slate-300 hover:text-white transition-all duration-300"
-              aria-label="Shopping Cart"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              
-              {/* Badge Dinámico con Animación de Entrada */}
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-black text-white ring-2 ring-slate-950 animate-scale-in">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+            {/* 🛠️ CAMBIO CLAVE: Renderizado condicional inteligente para evitar crashes */}
+            {onCartClick ? (
+              /* OPCIÓN A: Si onCartClick existe, ejecuta la acción para abrir drawer/modal */
+              <button
+                onClick={onCartClick}
+                className="relative p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-blue-500/50 hover:bg-slate-900 text-slate-300 hover:text-white transition-all duration-300"
+                aria-label="Open Shopping Cart"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-black text-white ring-2 ring-slate-950 animate-scale-in">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            ) : (
+              /* OPCIÓN B: Si no hay onCartClick, navega directo y limpio con Link de react-router-dom */
+              <Link
+                to="/cart"
+                className="relative p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-blue-500/50 hover:bg-slate-900 text-slate-300 hover:text-white transition-all duration-300 inline-flex items-center justify-center"
+                aria-label="Go to Shopping Cart"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-black text-white ring-2 ring-slate-950 animate-scale-in">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Hamburguesa Móvil */}
             <button
@@ -122,19 +160,27 @@ export function Header({ cartCount = 0, onCartClick }: HeaderProps) {
       </div>
 
       {/* =========================================================================
-          3. MENÚ DE DESPLIEGUE MÓVIL
+          3. MENÚ DE DESPLIEGUE MÓVIL (Conectado a React Router)
           ========================================================================= */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-slate-900 bg-slate-950/95 backdrop-blur-lg animate-fade-in">
           <div className="px-4 pt-3 pb-6 space-y-3">
-            <a
-              href="#catalog"
+            <Link
+              to="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-900 text-slate-200 transition-colors"
+            >
+              <span className="font-semibold">Home</span>
+              <ChevronRight className="w-4 h-4 text-slate-500" />
+            </Link>
+            <Link
+              to="/products"
               onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-900 text-slate-200 transition-colors"
             >
               <span className="font-semibold">Store Catalog</span>
               <ChevronRight className="w-4 h-4 text-slate-500" />
-            </a>
+            </Link>
             <a
               href="#services"
               onClick={() => setIsMobileMenuOpen(false)}
