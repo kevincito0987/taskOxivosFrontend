@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, CartItem } from '../types';
 
@@ -12,10 +12,12 @@ interface CartContextProps {
   clearCart: () => void;
 }
 
-// 2. Solución al ESLint: Quitamos el 'export' de aquí para que no chille Fast Refresh
-const CartContext = createContext<CartContextProps | undefined>(undefined);
+// Exportamos el contexto silenciando la regla de ESLint de exportación única de componentes
+// eslint-disable-next-line react-refresh/only-export-components
+export const CartContext = createContext<CartContextProps | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  // Inicialización segura del estado con localStorage
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window !== 'undefined') {
       const savedCart = localStorage.getItem('oxivos_cart');
@@ -24,10 +26,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return [];
   });
 
+  // Sincronización automática con localStorage
   useEffect(() => {
     localStorage.setItem('oxivos_cart', JSON.stringify(cart));
   }, [cart]);
 
+  // =========================================================================
+  // OPERACIONES DEL CARRITO
+  // =========================================================================
+
+  // A. Añadir al carrito controlando stock y variaciones de talla
   const addToCart = (product: Product, selectedSize: string | null) => {
     setCart((prevCart) => {
       const existingItemIndex = prevCart.findIndex(
@@ -38,6 +46,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const existingItem = prevCart[existingItemIndex];
         const newQuantity = existingItem.quantity + 1;
 
+        // Validación de stock físico real
         if (newQuantity > product.stock) {
           return prevCart; 
         }
@@ -55,6 +64,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // B. Eliminar elemento del carrito considerando id y talla
   const removeFromCart = (productId: string, selectedSize: string | null) => {
     setCart((prevCart) =>
       prevCart.filter(
@@ -63,6 +73,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  // C. Actualizar cantidades de forma dinámica controlando límites de stock
   const updateQuantity = (productId: string, selectedSize: string | null, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId, selectedSize);
@@ -80,8 +91,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  // D. Vaciar carrito por completo
   const clearCart = () => setCart([]);
 
+  // =========================================================================
+  // VALORES CALCULADOS EN TIEMPO REAL
+  // =========================================================================
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
 
@@ -100,14 +115,4 @@ export function CartProvider({ children }: { children: ReactNode }) {
       {children}
     </CartContext.Provider>
   );
-}
-
-// 3. El Hook personalizado: Es una función (permitida por Fast Refresh) y centraliza el uso del contexto
-// eslint-disable-next-line react-refresh/only-export-components
-export function useCart() {
-  const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error('useCart debe ser utilizado dentro de un CartProvider');
-  }
-  return context;
 }
