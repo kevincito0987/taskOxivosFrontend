@@ -1,19 +1,38 @@
-export interface Product {
-    id: number;
-    name: string;
-    description: string;
-    price: number;
-    image: string;         // URL de la imagen (de Imgur u otra fuente)
-    category: string;      // Ej: 'Shoes', 'Shirts', 'Accessories'
-    rating: number;        // De 1 a 5 para el componente de estrellitas
-    inStock: boolean;      // Para habilitar/inhabilitar el botón de compra
-    sizes?: string[];      // Array de tallas opcional, ej: ['S', 'M', 'L']
-    colors?: string[];     // Array de colores opcional, ej: ['#000000', '#FFFFFF']
+
+// Tipo de opción para el selector de tallas
+export interface SizeOption {
+    size: string;
+    isAvailable: boolean;
   }
   
-  // Estos dos los necesitaremos más adelante cuando hagamos el carrito de compras, ¡ya los dejas listos!
-  export interface CartItem extends Product {
+  // Representación estricta de un Producto
+  export interface Product {
+    id: string;
+    title: string;
+    price: number;
+    description: string;
+    category: string;
+    image: string;
+    rating?: {
+      rate: number;
+      count: number;
+    };
+    // Inventario total general
+    stock: number;
+    // Opciones de tallas del producto
+    sizes?: SizeOption[];
+  }
+  
+  // Representación de un elemento dentro de nuestro carrito
+  export interface CartItem {
+    product: Product;
     quantity: number;
-    selectedSize?: string;
-    selectedColor?: string;
+    selectedSize: string | null; // Nulo si el producto no tiene tallas (ej: accesorios)
+  }
+  
+  // Estructura de Filtros y Ordenamiento para la barra de búsquedas
+  export interface ProductFilters {
+    searchQuery: string;
+    category: string;
+    sortBy: 'price-asc' | 'price-desc' | 'popular' | 'default';
   }
