@@ -69,66 +69,47 @@ Plaintext
 
 ## 📂 Estructura del Proyecto
 
-La arquitectura se organiza de la siguiente manera para garantizar escalabilidad[cite: 2]:
+La arquitectura se organiza de la siguiente manera para garantizar escalabilidad, manteniendo una separación estricta entre la lógica de negocio, las vistas y los archivos de configuración del entorno:
 
-Plaintext
-
-```
-src/
-├── assets/                  # Logos, vectores y estilos globales
-│   └── styles/main.css      # Configuración y directivas de Tailwind CSS
+```plaintext
+Oxivos-Storefront/
+├── .devcontainer/           # Configuración del entorno blindado de desarrollo en contenedores
+├── public/                  # Recursos estáticos globales accesibles directamente por el navegador
 │
-├── components/              # Componentes visuales puros (Vistas tontas / Reutilizables)
-│   ├── common/              # UI Primitives independientes de negocio (Botones, Badges, etc.)
-│   │   ├── Button.tsx
-│   │   ├── Badge.tsx        # Etiquetas visuales para stock (In Stock / Out of Stock)
-│   │   ├── RatingStars.tsx  # Componente visual para ratings de productos
-│   │   └── Skeletons.tsx    # Skeleton loaders para transiciones e interfaces asíncronas
+├── src/
+│   ├── assets/              # Recursos multimedia y estilos compilados por Vite
+│   │   ├── icons/           # Iconografía personalizada del sistema
+│   │   ├── images/          # Assets de imágenes estáticas y placeholders
+│   │   └── styles/          # Directivas globales de Tailwind CSS (main.css / index.css)
 │   │
-│   ├── layout/              # Estructura del sitio (Headers, footers, etc.)
-│   │   ├── Header.tsx       # Barra de navegación con contador de carrito persistente
-│   │   └── Footer.tsx
+│   ├── components/          # Componentes visuales puros (Vistas tontas / Reutilizables)
+│   │   ├── common/          # UI Primitives independientes (Button, Badge, Skeletons, RatingStars)
+│   │   ├── layout/          # Estructura del sitio (Header interactivo, Footer)
+│   │   └── product/         # Componentes visuales del catálogo (ProductCard, ProductGrid, SizeSelector)
 │   │
-│   └── product/             # Componentes específicos del dominio de catálogo (Views)
-│       ├── ProductCard.tsx  # Tarjeta individual con interactividad y validación de stock
-│       ├── ProductGrid.tsx  # Grid responsivo de productos de 2 a 4 columnas según dispositivo
-│       └── SizeSelector.tsx # Control interactivo de tallas
+│   ├── containers/          # Capa lógica de obtención de datos y control del ciclo de vida (Containers)
+│   ├── context/             # Estado global encapsulado de la aplicación (CartContext)
+│   ├── data/                # Mock de datos e inventario local tipado (products.ts)
+│   ├── hooks/               # Custom hooks transversales y utilitarios de React (useCart, useDebounce)
+│   ├── pages/               # Puntos de composición de rutas físicas del cliente (HomePage, ProductsPage, etc.)
+│   ├── routes/              # Configuración y definición de rutas mediante React Router Dom
+│   ├── types/               # Tipado estricto e interfaces TypeScript del dominio global
+│   │
+│   ├── utils/               # 🌟 Funciones helper puras independientes del ciclo de vida de React
+│   │
+│   ├── viewmodels/          # Lógica pura de manipulación de datos para la UI (useProductListViewModel, etc.)
+│   ├── App.tsx              # Root Provider Wrapper de la aplicación
+│   └── main.tsx             # Inicializador y punto de entrada de React + Vite
 │
-├── containers/              # Capa lógica de obtención de datos y control del ciclo de vida (Containers)
-│   ├── HomeContainer.tsx    # Orquesta productos destacados
-│   ├── ProductListContainer.tsx    # Sincroniza búsqueda y filtros con la URL
-│   ├── ProductDetailContainer.tsx  # Controla la lógica de selección y adición al carro
-│   └── CartContainer.tsx           # Maneja operaciones, sumatorias y cantidades
-│
-├── context/                 # Estado global de la aplicación (Inyección de dependencias)[cite: 2]
-│   └── CartContext.tsx      # Lógica global y exclusiva del estado del carrito
-│
-├── data/                    # Mock de datos local estructurado
-│   └── products.ts          # Base de datos local tipada (10-12 productos según especificaciones)
-│
-├── hooks/                   # Custom hooks utilitarios transversales
-│   ├── useCart.ts           # Interfaz para interactuar con CartContext de forma segura
-│   └── useDebounce.ts       # Optimización de búsquedas reactivas en tiempo real
-│
-├── pages/                   # Enrutamiento físico y puntos de composición
-│   ├── HomePage.tsx         # Page 1: Hero banner & Productos destacados
-│   ├── ProductsPage.tsx     # Page 2: Grid interactivo con filtros
-│   ├── ProductDetailPage.tsx# Page 3: Detalle del producto, colores, tallas y stock
-│   └── CartPage.tsx         # Page 4: Checkout simulado, edición y totales
-│
-├── routes/                  # Configuración de rutas
-│   └── AppRoutes.tsx        # Definición de rutas del cliente utilizando React Router Dom
-│
-├── types/                   # Tipado estricto global
-│   └── index.ts             # Interfaces tipadas de Product, CartItem, Filters, etc.
-│
-├── viewmodels/              # Lógica pura de manipulación de datos para la UI (ViewModels)
-│   ├── useProductListViewModel.ts   # Filtrado categórico, búsquedas y ordenamiento
-│   └── useProductDetailViewModel.ts # Gestión de variaciones y validación estricta de stock
-│
-├── App.tsx                  # Root Provider Wrapper (Router + Cart Context)
-└── main.tsx                 # Inicializador de la aplicación
-```
+├── .dockerignore            # Exclusiones para la construcción de imágenes Docker
+├── docker-compose.yml       # Orquestación del contenedor local de desarrollo
+├── eslint.config.js         # Reglas de linters y calidad de código bajo estándares modernos
+├── index.html               # Plantilla HTML5 base
+├── package.json             # Manifest de scripts del proyecto y dependencias
+├── pnpm-lock.yaml           # Bloqueo estricto de versiones de paquetes
+├── postcss.config.mjs       # Pipeline de procesamiento CSS para Tailwind
+├── tsconfig.json            # Configuración maestra del compilador de TypeScript
+└── vite.config.ts           # Configuración del bundler optimizado de Vite
 
 
 
