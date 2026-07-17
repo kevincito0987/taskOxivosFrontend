@@ -4,13 +4,21 @@ import { RatingStars } from "../components/common/RatingStars";
 import { ShoppingCart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Interfaz para tipar los productos del catálogo
-interface Product {
-  id: string;
+// 🌟 Importamos tu hook oficial para manejar el estado global
+import { useCart } from "../hooks/useCart";
+// 🌟 Importamos el mockup local para inyectarle dinámicamente los nuevos productos en memoria
+import { PRODUCTS_MOCK } from "../data/products";
+// Importamos el tipo real de tu aplicación para mantener el tipado estricto
+import type { Product } from "../types";
+
+// Interfaz interna para mapear exactamente lo que responde la FakeStoreAPI
+interface ApiProduct {
+  id: number;
   title: string;
   price: number;
   category: string;
   image: string;
+  description: string;
   rating: {
     rate: number;
     count: number;
@@ -23,22 +31,47 @@ export function TopProductsPage() {
   const [topProducts, setTopProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 🌟 Extraemos el addToCart real de tu hook useCart
+  const { addToCart } = useCart();
+
   useEffect(() => {
-    // Aquí simulas la petición a tu API o cluster de datos
-    // Para el ejemplo, filtramos y ordenamos los productos con mayor rate
     const fetchTopProducts = async () => {
       try {
         setIsLoading(true);
-        // Reemplazar por tu llamada real a la API/Fetch
         const response = await fetch("https://fakestoreapi.com/products");
-        const data: Product[] = await response.json();
+        const data: ApiProduct[] = await response.json();
 
-        // Filtramos productos con más de 4 estrellas y ordenamos descendentemente
-        const filtered = data
+        // Filtramos y adaptamos la API externa a la interfaz 'Product' de Oxivos
+        const adaptedProducts: Product[] = data
           .filter((p) => p.rating && p.rating.rate >= 4.0)
-          .sort((a, b) => b.rating.rate - a.rating.rate);
+          .sort((a, b) => b.rating.rate - a.rating.rate)
+          .map((p) => ({
+            id: `ox-api-${p.id}`, // 🌟 Le damos un ID único y limpio que no choque con tus mocks locales
+            title: p.title,
+            price: p.price,
+            description: p.description,
+            category: p.category,
+            image: p.image,
+            stock: 15, // Stock ficticio para que pase las validaciones de tu hook del detalle y carrito
+            rating: {
+              rate: p.rating.rate,
+              count: p.rating.count,
+            },
+            sizes: [], // Sin tallas por defecto
+          }));
 
-        setTopProducts(filtered);
+        // 🌟 LA MAGIA: Registramos los productos de la API dentro de tu PRODUCTS_MOCK en memoria.
+        // Evitamos duplicados por si el componente se desmonta y desmonta.
+        adaptedProducts.forEach((newProduct) => {
+          const exists = PRODUCTS_MOCK.some(
+            (item) => item.id === newProduct.id
+          );
+          if (!exists) {
+            PRODUCTS_MOCK.push(newProduct);
+          }
+        });
+
+        setTopProducts(adaptedProducts);
       } catch (error) {
         console.error("Error cargando los top drops:", error);
       } finally {
@@ -82,7 +115,6 @@ export function TopProductsPage() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Skeleton simple para carga */}
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
@@ -105,7 +137,6 @@ export function TopProductsPage() {
                     alt={product.title}
                     className="w-32 h-32 object-contain transition-transform duration-500 group-hover:scale-105"
                   />
-                  {/* Badge flotante del score */}
                   <div className="absolute top-2 right-2 px-2 py-1 bg-slate-950/80 border border-slate-800 rounded-lg flex items-center gap-1 backdrop-blur-sm">
                     <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                     <span className="text-[10px] font-bold text-white">
@@ -114,20 +145,17 @@ export function TopProductsPage() {
                   </div>
                 </div>
 
-                {/* Categoría y Título */}
                 <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block mb-1">
                   {product.category}
                 </span>
-                <Link
-                  to={`/products/${product.id}`}
-                  className="hover:underline"
-                >
-                  <h3 className="text-sm font-bold text-white line-clamp-2 min-h-[40px] tracking-tight">
+
+                {/* 🌟 Enlace dinámico con ID real único asignado en la sincronización */}
+                <Link to={`/product/${product.id}`} className="hover:underline">
+                  <h3 className="text-sm font-bold text-white line-clamp-2 min-h-[40px] tracking-tight hover:text-blue-400 transition-colors">
                     {product.title}
                   </h3>
                 </Link>
 
-                {/* Componente RatingStars en Modo Lectura */}
                 <div className="mt-2 mb-4">
                   <RatingStars
                     rating={product.rating.rate}
@@ -142,8 +170,11 @@ export function TopProductsPage() {
                 <span className="text-sm font-black text-white">
                   {formatPrice(product.price)}
                 </span>
+
+                {/* Botón conectado al carrito */}
                 <button
-                  className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-blue-500/50 transition-colors"
+                  onClick={() => addToCart(product, null)}
+                  className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-blue-500 hover:bg-blue-600/10 transition-all active:scale-95"
                   aria-label="Add to cart"
                 >
                   <ShoppingCart className="w-4 h-4" />

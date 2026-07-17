@@ -29,38 +29,47 @@ export function HomeContainer() {
 
   return (
     <div className="space-y-24 pb-20">
-      {/* HERO SECTION */}
-      <section className="relative overflow-hidden pt-20 pb-16 md:pt-32 md:pb-24 border-b border-slate-900 bg-slate-950/20">
+      {/* 🌟 HERO SECTION CON IMAGEN DE FONDO ADAPTADA */}
+      <section
+        className="relative overflow-hidden pt-20 pb-16 md:pt-32 md:pb-24 border-b border-slate-900 bg-cover bg-right sm:bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `linear-gradient(to right, rgba(2, 6, 23, 0.95) 30%, rgba(2, 6, 23, 0.4) 70%, rgba(2, 6, 23, 0.85)), url('https://i.imgur.com/kHmd1x6.png')`,
+        }}
+      >
+        {/* Efectos de luces sutiles encima del fondo */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-1/3 left-1/3 w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3.5 py-1.5 rounded-full text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-6 animate-fade-in">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3.5 py-1.5 rounded-full text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-6 animate-fade-in mx-auto lg:mx-0">
             <Sparkles className="w-3.5 h-3.5 animate-pulse" />
             Colección Limitada Disponible
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-[1.1] max-w-4xl mx-auto">
+          <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-[1.1] max-w-4xl mx-auto lg:mx-0">
             Eleva tu Entorno con <br className="hidden sm:inline" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400">
               Estilo y Código Impecable
             </span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium dropped-shadow">
             La fusión perfecta entre indumentaria exclusiva para desarrolladores
             y soluciones web robustas de última generación listas para
             producción.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+          <div className="mt-10 flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
+            {/* 🌟 CORRECCIÓN: Se usa la prop iconRight nativa y se elimina el flex/gap del className */}
             <Button
               variant="primary"
               onClick={handleExploreCatalog}
-              className="py-3 px-8 text-sm uppercase tracking-wider font-extrabold flex items-center gap-2 group w-full sm:w-auto"
+              iconRight={
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              }
+              className="py-3 px-8 text-sm uppercase tracking-wider font-extrabold w-full sm:w-auto group"
             >
               Explorar Catálogo
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
             <a href="#about" className="w-full sm:w-auto">
               <Button
@@ -131,13 +140,15 @@ export function HomeContainer() {
             </p>
           </div>
 
+          {/* 🌟 CORRECCIÓN: Se usa la prop iconRight nativa para el botón del catálogo */}
           <Button
             variant="ghost"
             size="sm"
             onClick={handleExploreCatalog}
-            className="text-xs font-bold text-blue-400 hover:text-blue-300 gap-1.5 self-start sm:self-auto"
+            iconRight={<ArrowRight className="w-3 h-3" />}
+            className="text-xs font-bold text-blue-400 hover:text-blue-300 self-start sm:self-auto"
           >
-            Ver todos los productos <ArrowRight className="w-3 h-3" />
+            Ver todos los productos
           </Button>
         </div>
 

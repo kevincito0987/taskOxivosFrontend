@@ -6,15 +6,7 @@ import { RatingStars } from "../components/common/RatingStars";
 import { SizeSelector } from "../components/product/SizeSelector";
 import { Button } from "../components/common/Button";
 import { Badge } from "../components/common/Badge";
-import {
-  ShoppingCart,
-  ArrowLeft,
-  ShieldCheck,
-  Truck,
-  RefreshCw,
-  MessageSquare,
-  Send,
-} from "lucide-react";
+import { ShoppingCart, ArrowLeft, MessageSquare, Send } from "lucide-react";
 
 interface ProductDetailContainerProps {
   productId: string;
@@ -214,14 +206,16 @@ export function ProductDetailContainer({
             </div>
           </div>
 
+          {/* 🌟 CORRECCIÓN AQUÍ: Pasamos el icono por prop nativa e incrementamos el padding vertical */}
           <Button
             variant="primary"
             fullWidth
             onClick={handleAddToCart}
             disabled={availableStock <= 0 || isOutOfStock}
-            className="py-4 font-black uppercase flex items-center justify-center gap-2"
+            icon={<ShoppingCart className="w-4 h-4" />}
+            className="py-4 text-sm font-black uppercase tracking-wider"
           >
-            <ShoppingCart className="w-4 h-4" /> Añadir al Carrito
+            Añadir al Carrito
           </Button>
         </section>
       </div>
@@ -252,7 +246,6 @@ export function ProductDetailContainer({
               <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
                 Tu Puntuación
               </label>
-              {/* AQUÍ INYECTAMOS EL COMPONENTE COMO INTERACTIVO CON READONLY FALSE */}
               <RatingStars
                 rating={userRating}
                 readOnly={false}
@@ -275,13 +268,15 @@ export function ProductDetailContainer({
               />
             </div>
 
+            {/* 🌟 CORRECCIÓN AQUÍ: Pasamos el icono por la prop iconRight nativa */}
             <Button
               type="submit"
               variant="outline"
               size="sm"
-              className="w-full h-10 text-xs uppercase font-extrabold tracking-wider gap-2"
+              iconRight={<Send className="w-3 h-3" />}
+              className="w-full h-10 text-xs uppercase font-extrabold tracking-wider"
             >
-              Enviar Review <Send className="w-3 h-3" />
+              Enviar Review
             </Button>
           </form>
 
