@@ -48,11 +48,12 @@ export function TopProductsPage() {
           .map((p) => ({
             id: `ox-api-${p.id}`, // 🌟 Le damos un ID único y limpio que no choque con tus mocks locales
             title: p.title,
-            price: p.price,
+            // 🌟 Convertimos a COP desde el origen para mantener la arquitectura limpia
+            price: p.price * USD_TO_COP_RATE,
             description: p.description,
             category: p.category,
             image: p.image,
-            stock: 15, // Stock ficticio para que pase las validaciones de tu hook del detalle y carrito
+            stock: 15, // Stock ficticio para que pase las validaciones
             rating: {
               rate: p.rating.rate,
               count: p.rating.count,
@@ -60,8 +61,7 @@ export function TopProductsPage() {
             sizes: [], // Sin tallas por defecto
           }));
 
-        // 🌟 LA MAGIA: Registramos los productos de la API dentro de tu PRODUCTS_MOCK en memoria.
-        // Evitamos duplicados por si el componente se desmonta y desmonta.
+        // 🌟 Registramos los productos de la API dentro de tu PRODUCTS_MOCK en memoria
         adaptedProducts.forEach((newProduct) => {
           const exists = PRODUCTS_MOCK.some(
             (item) => item.id === newProduct.id
@@ -82,13 +82,14 @@ export function TopProductsPage() {
     fetchTopProducts();
   }, []);
 
+  // Formateador limpio sin lógica de multiplicación duplicada
   const formatPrice = (value: number) => {
     return (
       new Intl.NumberFormat("es-CO", {
         style: "currency",
         currency: "COP",
         minimumFractionDigits: 0,
-      }).format(value * USD_TO_COP_RATE) + " COP"
+      }).format(value) + " COP"
     );
   };
 
@@ -124,64 +125,68 @@ export function TopProductsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {topProducts.map((product) => (
-            <div
-              key={product.id}
-              className="group relative rounded-2xl bg-slate-950/40 border border-slate-900 p-4 flex flex-col justify-between transition-all duration-300 hover:border-slate-800 hover:shadow-[0_0_30px_rgba(37,99,235,0.05)]"
-            >
-              <div>
-                {/* Contenedor de la Imagen */}
-                <div className="relative aspect-square rounded-xl bg-slate-900/50 border border-slate-800/50 overflow-hidden mb-4 flex items-center justify-center">
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    className="w-32 h-32 object-contain transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute top-2 right-2 px-2 py-1 bg-slate-950/80 border border-slate-800 rounded-lg flex items-center gap-1 backdrop-blur-sm">
-                    <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                    <span className="text-[10px] font-bold text-white">
-                      {product.rating.rate.toFixed(1)}
-                    </span>
+          {topProducts.map((product) => {
+            // Safe guard por si 'rating' llegase a faltar en el objeto
+            const productRating = product.rating?.rate ?? 0;
+
+            return (
+              <div
+                key={product.id}
+                className="group relative rounded-2xl bg-slate-950/40 border border-slate-900 p-4 flex flex-col justify-between transition-all duration-300 hover:border-slate-800 hover:shadow-[0_0_30px_rgba(37,99,235,0.05)]"
+              >
+                <div>
+                  {/* Contenedor de la Imagen */}
+                  <div className="relative aspect-square rounded-xl bg-slate-900/50 border border-slate-800/50 overflow-hidden mb-4 flex items-center justify-center">
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className="w-32 h-32 object-contain transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute top-2 right-2 px-2 py-1 bg-slate-950/80 border border-slate-800 rounded-lg flex items-center gap-1 backdrop-blur-sm">
+                      <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                      <span className="text-[10px] font-bold text-white">
+                        {productRating.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block mb-1">
+                    {product.category}
+                  </span>
+
+                  {/* Enlace dinámico con ID real único */}
+                  <Link
+                    to={`/product/${product.id}`}
+                    className="hover:underline"
+                  >
+                    <h3 className="text-sm font-bold text-white line-clamp-2 min-h-[40px] tracking-tight hover:text-blue-400 transition-colors">
+                      {product.title}
+                    </h3>
+                  </Link>
+
+                  <div className="mt-2 mb-4">
+                    <RatingStars rating={productRating} readOnly size="sm" />
                   </div>
                 </div>
 
-                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block mb-1">
-                  {product.category}
-                </span>
+                {/* Precio y Acción */}
+                <div className="mt-4 pt-4 border-t border-slate-900 flex items-center justify-between">
+                  <span className="text-sm font-black text-white">
+                    {formatPrice(product.price)}
+                  </span>
 
-                {/* 🌟 Enlace dinámico con ID real único asignado en la sincronización */}
-                <Link to={`/product/${product.id}`} className="hover:underline">
-                  <h3 className="text-sm font-bold text-white line-clamp-2 min-h-[40px] tracking-tight hover:text-blue-400 transition-colors">
-                    {product.title}
-                  </h3>
-                </Link>
-
-                <div className="mt-2 mb-4">
-                  <RatingStars
-                    rating={product.rating.rate}
-                    readOnly
-                    size="sm"
-                  />
+                  {/* Botón conectado al carrito */}
+                  <button
+                    onClick={() => addToCart(product, null)}
+                    className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-blue-500 hover:bg-blue-600/10 transition-all active:scale-95"
+                    aria-label="Add to cart"
+                  >
+                    <ShoppingCart className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              {/* Precio y Acción */}
-              <div className="mt-4 pt-4 border-t border-slate-900 flex items-center justify-between">
-                <span className="text-sm font-black text-white">
-                  {formatPrice(product.price)}
-                </span>
-
-                {/* Botón conectado al carrito */}
-                <button
-                  onClick={() => addToCart(product, null)}
-                  className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-blue-500 hover:bg-blue-600/10 transition-all active:scale-95"
-                  aria-label="Add to cart"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </main>
