@@ -1,11 +1,19 @@
-// src/components/product/ProductListContainer.tsx
-import { useProductListViewModel } from '../viewmodels/useProductListViewModel';
-import { ProductGrid } from '../components/product/ProductGrid';
-import { Button } from '../components/common/Button';
-import { Search, SlidersHorizontal, X, ArrowUpDown } from 'lucide-react';
+import { useProductListViewModel } from "../viewmodels/useProductListViewModel";
+import { ProductGrid } from "../components/product/ProductGrid";
+import { Button } from "../components/common/Button";
+import { useCart } from "../hooks/useCart";
+import { useNavigate } from "react-router-dom";
+// Importamos tu interfaz global renombrada para evitar conflictos
+import type { Product as GlobalProduct } from "../types";
+import { Search, SlidersHorizontal, X, ArrowUpDown } from "lucide-react";
+
+// Tasa de cambio estática: 1 USD = 4,000 COP
+const USD_TO_COP_RATE = 4000;
 
 export function ProductListContainer() {
-  // Conectamos la ViewModel específica para esta vista
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+
   const {
     searchQuery,
     selectedCategory,
@@ -17,8 +25,17 @@ export function ProductListContainer() {
     handleClearFilters,
   } = useProductListViewModel();
 
+  // Convertimos los precios de los productos en tiempo de ejecución para el Grid
+  const productsInCOP = filteredProducts.map((product) => ({
+    ...product,
+    price: product.price * USD_TO_COP_RATE,
+  }));
+
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" id="catalog">
+    <section
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+      id="catalog"
+    >
       {/* CONTENEDOR DE ENCABEZADO Y CONTROL DE BÚSQUEDA */}
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between pb-8 border-b border-slate-900">
         <div>
@@ -26,7 +43,8 @@ export function ProductListContainer() {
             Catálogo Oxivos
           </h2>
           <p className="text-slate-400 text-sm mt-1">
-            Explora soluciones web listas para producción y merchandising exclusivo.
+            Explora soluciones web listas para producción y merchandising
+            exclusivo.
           </p>
         </div>
 
@@ -36,13 +54,13 @@ export function ProductListContainer() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => updateFilter('search', e.target.value)}
+            onChange={(e) => updateFilter("search", e.target.value)}
             placeholder="Buscar productos..."
             className="w-full bg-slate-950/60 border border-slate-900 hover:border-slate-800 focus:border-blue-500/50 rounded-xl py-2.5 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/20 transition-all"
           />
           {searchQuery && (
             <button
-              onClick={() => updateFilter('search', '')}
+              onClick={() => updateFilter("search", "")}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-slate-900 text-slate-400 hover:text-white"
               aria-label="Limpiar búsqueda"
             >
@@ -61,14 +79,14 @@ export function ProductListContainer() {
             return (
               <button
                 key={category}
-                onClick={() => updateFilter('category', category)}
+                onClick={() => updateFilter("category", category)}
                 className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all duration-300 whitespace-nowrap capitalize ${
                   isActive
-                    ? 'bg-blue-600/10 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.15)]'
-                    : 'bg-slate-950/30 border-slate-900 text-slate-400 hover:border-slate-800 hover:text-white'
+                    ? "bg-blue-600/10 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.15)]"
+                    : "bg-slate-950/30 border-slate-900 text-slate-400 hover:border-slate-800 hover:text-white"
                 }`}
               >
-                {category === 'all' ? 'Ver Todos' : category}
+                {category === "all" ? "Ver Todos" : category}
               </button>
             );
           })}
@@ -80,7 +98,7 @@ export function ProductListContainer() {
             <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
             <select
               value={sortBy}
-              onChange={(e) => updateFilter('sort', e.target.value)}
+              onChange={(e) => updateFilter("sort", e.target.value)}
               className="appearance-none bg-slate-950/60 border border-slate-900 hover:border-slate-800 rounded-xl py-2 pl-9 pr-8 text-xs font-bold text-slate-300 focus:outline-none focus:border-blue-500/50 cursor-pointer transition-all"
             >
               <option value="featured">Destacados</option>
@@ -91,7 +109,9 @@ export function ProductListContainer() {
           </div>
 
           {/* Botón de limpiar filtros activos */}
-          {(selectedCategory !== 'all' || searchQuery !== '' || sortBy !== 'featured') && (
+          {(selectedCategory !== "all" ||
+            searchQuery !== "" ||
+            sortBy !== "featured") && (
             <Button
               variant="ghost"
               size="sm"
@@ -109,13 +129,23 @@ export function ProductListContainer() {
       {/* CONTENIDO DEL GRID DE PRODUCTOS */}
       <div className="mt-4">
         <ProductGrid
-          products={filteredProducts}
+          products={productsInCOP}
           isLoading={isLoading}
           onAddToCart={(product) => {
-            console.log('Añadiendo al carrito:', product.title);
+            // Forzamos el tipado de forma segura al tipo global que sí tiene 'sizes' sin gatillar el ESLint de 'any'
+            const globalProduct = product as unknown as GlobalProduct;
+
+            // Evaluamos de forma segura si existen tallas
+            const defaultSize =
+              globalProduct.sizes && globalProduct.sizes.length > 0
+                ? globalProduct.sizes[0].size
+                : null;
+
+            // Pasamos el objeto perfectamente tipado con precio convertido
+            addToCart(globalProduct, defaultSize);
           }}
           onViewDetails={(id) => {
-            console.log('Navegando al detalle:', id);
+            navigate(`/product/${id}`);
           }}
         />
       </div>
