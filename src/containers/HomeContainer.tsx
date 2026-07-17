@@ -1,3 +1,4 @@
+// src/containers/HomeContainer.tsx
 import { useHomeViewModel } from "../viewmodels/useHomeViewModel";
 import { ProductGrid } from "../components/product/ProductGrid";
 import { Button } from "../components/common/Button";
@@ -7,25 +8,16 @@ import { useNavigate } from "react-router-dom";
 import type { Product as GlobalProduct } from "../types";
 import { Terminal, Cpu, Sparkles, ArrowRight, Layers } from "lucide-react";
 
-// Tasa de cambio estática: 1 USD = 4,000 COP
-const USD_TO_COP_RATE = 4000;
-
 export function HomeContainer() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
   const {
     isLoading,
-    featuredProducts,
+    featuredProducts, // 🌟 Ya viene limpio y en COP desde el useHomeViewModel
     handleExploreCatalog,
     handleNewsletterSubmit,
   } = useHomeViewModel();
-
-  // Convertimos los precios de los productos destacados en tiempo de ejecución
-  const featuredProductsInCOP = featuredProducts.map((product) => ({
-    ...product,
-    price: product.price * USD_TO_COP_RATE,
-  }));
 
   return (
     <div className="space-y-24 pb-20">
@@ -60,7 +52,6 @@ export function HomeContainer() {
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
-            {/* 🌟 CORRECCIÓN: Se usa la prop iconRight nativa y se elimina el flex/gap del className */}
             <Button
               variant="primary"
               onClick={handleExploreCatalog}
@@ -140,7 +131,6 @@ export function HomeContainer() {
             </p>
           </div>
 
-          {/* 🌟 CORRECCIÓN: Se usa la prop iconRight nativa para el botón del catálogo */}
           <Button
             variant="ghost"
             size="sm"
@@ -152,8 +142,9 @@ export function HomeContainer() {
           </Button>
         </div>
 
+        {/* 🌟 Inyectamos el listado directamente mapeado en COP desde el ViewModel */}
         <ProductGrid
-          products={featuredProductsInCOP}
+          products={featuredProducts}
           isLoading={isLoading}
           onAddToCart={(product) => {
             const globalProduct = product as unknown as GlobalProduct;

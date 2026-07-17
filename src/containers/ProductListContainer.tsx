@@ -1,3 +1,4 @@
+// src/containers/ProductListContainer.tsx
 import { useProductListViewModel } from "../viewmodels/useProductListViewModel";
 import { ProductGrid } from "../components/product/ProductGrid";
 import { Button } from "../components/common/Button";
@@ -6,9 +7,6 @@ import { useNavigate } from "react-router-dom";
 // Importamos tu interfaz global renombrada para evitar conflictos
 import type { Product as GlobalProduct } from "../types";
 import { Search, SlidersHorizontal, X, ArrowUpDown } from "lucide-react";
-
-// Tasa de cambio estática: 1 USD = 4,000 COP
-const USD_TO_COP_RATE = 4000;
 
 export function ProductListContainer() {
   const navigate = useNavigate();
@@ -20,16 +18,10 @@ export function ProductListContainer() {
     sortBy,
     categories,
     isLoading,
-    filteredProducts,
+    filteredProducts, // 🌟 Ya viene unificado y convertido a COP desde el ViewModel
     updateFilter,
     handleClearFilters,
   } = useProductListViewModel();
-
-  // Convertimos los precios de los productos en tiempo de ejecución para el Grid
-  const productsInCOP = filteredProducts.map((product) => ({
-    ...product,
-    price: product.price * USD_TO_COP_RATE,
-  }));
 
   return (
     <section
@@ -129,10 +121,9 @@ export function ProductListContainer() {
       {/* CONTENIDO DEL GRID DE PRODUCTOS */}
       <div className="mt-4">
         <ProductGrid
-          products={productsInCOP}
+          products={filteredProducts} // 🌟 Pasamos la lista directa del ViewModel en COP
           isLoading={isLoading}
           onAddToCart={(product) => {
-            // Forzamos el tipado de forma segura al tipo global que sí tiene 'sizes' sin gatillar el ESLint de 'any'
             const globalProduct = product as unknown as GlobalProduct;
 
             // Evaluamos de forma segura si existen tallas

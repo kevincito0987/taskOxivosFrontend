@@ -1,17 +1,15 @@
+// src/containers/CartContainer.tsx
 import { useCartViewModel } from "../viewmodels/useCartViewModel";
 import { CartItemList } from "../components/product/CartItemList";
 import { CartSummary } from "../components/product/CartSummary";
 import { EmptyCart } from "../components/product/EmptyCart";
 import { Button } from "../components/common/Button";
 
-// Tasa de cambio estática: 1 USD = 4,000 COP
-const USD_TO_COP_RATE = 4000;
-
 export function CartContainer() {
   const {
-    cart,
+    cartItemsInCOP, // 🌟 Consumimos los ítems ya adaptados desde el ViewModel
+    totalInCOP, // 🌟 Consumimos el total calculado en COP desde el ViewModel
     cartCount,
-    cartTotal,
     isProcessingCheckout,
     handleUpdateQuantity,
     handleRemove,
@@ -19,32 +17,10 @@ export function CartContainer() {
     handleCheckout,
   } = useCartViewModel();
 
-  if (cart.length === 0) {
+  // 🌟 Validación de carrito vacío usando la lista adaptada del ViewModel
+  if (cartItemsInCOP.length === 0) {
     return <EmptyCart />;
   }
-
-  // Mapeamos los artículos dentro del carrito para asegurar que sus propiedades reflejen el valor real en COP
-  const cartItemsInCOP = cart.map((item) => {
-    // Si el precio ya viene inflado por los componentes anteriores (ej: > 1000), lo dejamos igual;
-    // si viene en formato base USD (ej: 85), lo convertimos multiplicando por la tasa.
-    const productPrice =
-      item.product.price < 1000
-        ? item.product.price * USD_TO_COP_RATE
-        : item.product.price;
-    return {
-      ...item,
-      product: {
-        ...item.product,
-        price: productPrice,
-      },
-    };
-  });
-
-  // Ajustamos el subtotal total sumando dinámicamente los ítems ya convertidos
-  const totalInCOP = cartItemsInCOP.reduce(
-    (acc, item) => acc + item.product.price * item.quantity,
-    0
-  );
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -84,7 +60,7 @@ export function CartContainer() {
             </Button>
           </div>
 
-          {/* Pasamos los artículos adaptados a COP reales */}
+          {/* 🌟 Pasamos directamente los artículos adaptados a COP reales */}
           <CartItemList
             items={cartItemsInCOP}
             onUpdateQuantity={handleUpdateQuantity}
@@ -94,7 +70,7 @@ export function CartContainer() {
 
         {/* LADO DERECHO: Resumen de Compra Dinámico */}
         <aside className="sticky top-28">
-          {/* Pasamos la sumatoria ajustada en COP */}
+          {/* 🌟 Pasamos el subtotal ajustado en COP directamente */}
           <CartSummary
             items={cartItemsInCOP}
             cartTotal={totalInCOP}

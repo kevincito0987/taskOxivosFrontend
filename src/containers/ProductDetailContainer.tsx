@@ -1,5 +1,5 @@
 // src/components/product/ProductDetailContainer.tsx
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useProductDetailViewModel } from "../viewmodels/useProductDetailViewModel";
 import { ProductDetailSkeleton } from "../components/common/Skeletons";
 import { RatingStars } from "../components/common/RatingStars";
@@ -19,8 +19,6 @@ interface UserReview {
   comment: string;
   date: string;
 }
-
-const USD_TO_COP_RATE = 4000;
 
 export function ProductDetailContainer({
   productId,
@@ -54,15 +52,16 @@ export function ProductDetailContainer({
     },
   ]);
 
-  const formatPrice = (value: number) => {
+  // 🌟 Formateador limpio: El precio ya viene convertido a COP numéricamente desde el ViewModel
+  const formatPrice = useCallback((value: number) => {
     return (
       new Intl.NumberFormat("es-CO", {
         style: "currency",
         currency: "COP",
         minimumFractionDigits: 0,
-      }).format(value * USD_TO_COP_RATE) + " COP"
+      }).format(value) + " COP"
     );
-  };
+  }, []);
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +88,7 @@ export function ProductDetailContainer({
         <ProductDetailSkeleton />
       </div>
     );
+
   if (!product)
     return (
       <div className="text-center py-20 text-white">Producto no encontrado</div>
@@ -102,6 +102,20 @@ export function ProductDetailContainer({
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
+      {/* BANNER DE NOTIFICACIÓN DE ÉXITO */}
+      {successMessage && (
+        <div className="fixed bottom-5 right-5 z-50 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider animate-fade-in backdrop-blur-md">
+          ¡Producto añadido al carrito, bro!
+        </div>
+      )}
+
+      {/* MENSAJE DE ERROR LOCAL */}
+      {error && (
+        <div className="fixed bottom-5 right-5 z-50 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider animate-fade-in backdrop-blur-md">
+          {error}
+        </div>
+      )}
+
       <div className="mb-8">
         <a
           href="#catalog"
@@ -206,7 +220,6 @@ export function ProductDetailContainer({
             </div>
           </div>
 
-          {/* 🌟 CORRECCIÓN AQUÍ: Pasamos el icono por prop nativa e incrementamos el padding vertical */}
           <Button
             variant="primary"
             fullWidth
@@ -220,9 +233,7 @@ export function ProductDetailContainer({
         </section>
       </div>
 
-      {/* =========================================================================
-          SECCIÓN NUEVA: SISTEMA INTERACTIVO DE FEEDBACK & REVIEWS DE OXIVOS
-          ========================================================================= */}
+      {/* FEEDBACK DEL PRODUCTO */}
       <section className="mt-20 pt-10 border-t border-slate-900 max-w-4xl">
         <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5 mb-2">
           <MessageSquare className="w-5 h-5 text-blue-500" />
@@ -268,7 +279,6 @@ export function ProductDetailContainer({
               />
             </div>
 
-            {/* 🌟 CORRECCIÓN AQUÍ: Pasamos el icono por la prop iconRight nativa */}
             <Button
               type="submit"
               variant="outline"

@@ -1,28 +1,23 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { PRODUCTS_MOCK } from '../data/products';
-import type { Product } from '../types';
+// src/viewmodels/useProductListViewModel.ts
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { PRODUCTS_MOCK } from "../data/products";
+import { USD_TO_COP_RATE } from "../utils/currency"; // 🌟 Importamos la tasa de cambio
+import type { Product } from "../types";
 
 export function useProductListViewModel() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // =========================================================================
-  // EXTRAER PARÁMETROS DE LA URL
-  // =========================================================================
-  const searchQuery = searchParams.get('search') || '';
-  const selectedCategory = searchParams.get('category') || 'all';
-  const sortBy = searchParams.get('sort') || 'featured';
+  const searchQuery = searchParams.get("search") || "";
+  const selectedCategory = searchParams.get("category") || "all";
+  const sortBy = searchParams.get("sort") || "featured";
 
-  // Extraer las categorías únicas disponibles en el mock
   const categories = useMemo(() => {
     const rawCategories = PRODUCTS_MOCK.map((p) => p.category);
-    return ['all', ...Array.from(new Set(rawCategories))];
+    return ["all", ...Array.from(new Set(rawCategories))];
   }, []);
 
-  // =========================================================================
-  // CONTROLADOR DE EFECTO (ESTADO DE CARGA)
-  // =========================================================================
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -31,19 +26,16 @@ export function useProductListViewModel() {
     return () => clearTimeout(timer);
   }, [searchQuery, selectedCategory, sortBy]);
 
-  // =========================================================================
-  // CONTROLADORES DE ACCIONES (MUTADORES DE ESTADO EN URL)
-  // =========================================================================
   const updateFilter = (key: string, value: string) => {
-    setIsLoading(true); // Encendemos el esqueleto inmediatamente al interactuar
+    setIsLoading(true);
     const newParams = new URLSearchParams(searchParams);
-    
-    if (value && value !== 'all' && value !== 'featured') {
+
+    if (value && value !== "all" && value !== "featured") {
       newParams.set(key, value);
     } else {
       newParams.delete(key);
     }
-    
+
     setSearchParams(newParams);
   };
 
@@ -53,13 +45,18 @@ export function useProductListViewModel() {
   };
 
   // =========================================================================
-  // PROCESAMIENTO FILTRADO & ORDENADO (MEMORIZADO)
+  // PROCESAMIENTO FILTRADO, CONVERTIDO & ORDENADO (MEMORIZADO)
   // =========================================================================
-  const filteredProducts = useMemo(() => {
-    let result = [...PRODUCTS_MOCK];
+  const filteredProductsInCOP = useMemo(() => {
+    // 1. Mapeamos la lista original convirtiendo los precios base a COP
+    let result: Product[] = PRODUCTS_MOCK.map((product) => ({
+      ...product,
+      price:
+        product.price < 1000 ? product.price * USD_TO_COP_RATE : product.price,
+    }));
 
-    // 1. Filtrado por cadena de texto
-    if (searchQuery.trim() !== '') {
+    // 2. Filtrado por cadena de texto
+    if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase().trim();
       result = result.filter(
         (product) =>
@@ -68,33 +65,33 @@ export function useProductListViewModel() {
       );
     }
 
-    // 2. Filtrado por categoría
-    if (selectedCategory !== 'all') {
+    // 3. Filtrado por categoría
+    if (selectedCategory !== "all") {
       result = result.filter(
-        (product) => product.category.toLowerCase() === selectedCategory.toLowerCase()
+        (product) =>
+          product.category.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
-    // 3. Criterios de ordenamiento
-    if (sortBy === 'price-asc') {
+    // 4. Criterios de ordenamiento (Ahora funciona perfecto porque todos son valores en COP)
+    if (sortBy === "price-asc") {
       result.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-desc') {
+    } else if (sortBy === "price-desc") {
       result.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'rating') {
+    } else if (sortBy === "rating") {
       result.sort((a, b) => (b.rating?.rate || 0) - (a.rating?.rate || 0));
     }
 
     return result;
   }, [searchQuery, selectedCategory, sortBy]);
 
-  // Retornamos la API pública de la ViewModel
   return {
     searchQuery,
     selectedCategory,
     sortBy,
     categories,
     isLoading,
-    filteredProducts,
+    filteredProducts: filteredProductsInCOP, // 🌟 Retorna la lista unificada en COP
     updateFilter,
     handleClearFilters,
   };

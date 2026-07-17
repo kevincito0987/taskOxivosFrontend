@@ -1,6 +1,7 @@
 // src/components/product/CartSummary.tsx
-import { Button } from '../common/Button';
-import type { CartItem } from '../../types';
+import { Button } from "../common/Button";
+import { formatToCOP } from "../../utils/currency"; // 🌟 Importación utilitaria
+import type { CartItem } from "../../types";
 
 interface CartSummaryProps {
   items: CartItem[];
@@ -9,7 +10,12 @@ interface CartSummaryProps {
   onCheckout: () => void;
 }
 
-export function CartSummary({ items, cartTotal, isProcessing, onCheckout }: CartSummaryProps) {
+export function CartSummary({
+  items,
+  cartTotal,
+  isProcessing,
+  onCheckout,
+}: CartSummaryProps) {
   const shipping = cartTotal > 150000 ? 0 : 15000; // Envío gratis en compras mayores a $150k COP
   const total = cartTotal + shipping;
 
@@ -19,17 +25,30 @@ export function CartSummary({ items, cartTotal, isProcessing, onCheckout }: Cart
         Resumen del Pedido
       </h3>
 
-      {/* desglose de subtotales */}
+      {/* Desglose de subtotales */}
       <div className="space-y-3 text-sm text-slate-400">
         <div className="flex justify-between">
-          <span>Subtotal ({items.reduce((acc, curr) => acc + curr.quantity, 0)} prod.)</span>
-          <span className="font-semibold text-slate-200">${cartTotal.toLocaleString()} COP</span>
+          <span>
+            Subtotal ({items.reduce((acc, curr) => acc + curr.quantity, 0)}{" "}
+            prod.)
+          </span>
+          {/* 🌟 Subtotal Formateado */}
+          <span className="font-semibold text-slate-200">
+            {formatToCOP(cartTotal)}
+          </span>
         </div>
-        
+
         <div className="flex justify-between">
           <span>Envío</span>
-          <span className={shipping === 0 ? "text-emerald-400 font-bold" : "font-semibold text-slate-200"}>
-            {shipping === 0 ? 'Gratis' : `$${shipping.toLocaleString()} COP`}
+          {/* 🌟 Envío Formateado */}
+          <span
+            className={
+              shipping === 0
+                ? "text-emerald-400 font-bold"
+                : "font-semibold text-slate-200"
+            }
+          >
+            {shipping === 0 ? "Gratis" : formatToCOP(shipping)}
           </span>
         </div>
 
@@ -39,13 +58,13 @@ export function CartSummary({ items, cartTotal, isProcessing, onCheckout }: Cart
           </p>
         )}
 
+        {/* 🌟 Total Final Formateado */}
         <div className="flex justify-between text-base font-extrabold text-white pt-3 border-t border-slate-900">
           <span>Total</span>
-          <span>${total.toLocaleString()} COP</span>
+          <span className="text-emerald-400">{formatToCOP(total)}</span>
         </div>
       </div>
 
-      {/* Botón de Checkout Integrado con el Estado de Carga Nativo */}
       <div className="pt-2">
         <Button
           variant="primary"
