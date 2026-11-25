@@ -1,32 +1,32 @@
 {
-    "name": "Oxivos Store - Frontend DevContainer",
-    "dockerComposeFile": ["../docker-compose.yml"],
-    "service": "app",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-    "customizations": {
-      "vscode": {
-        "extensions": [
-          "esbenp.prettier-vscode",
-          "dbaeumer.vscode-eslint",
-          "vivaxy.vscode-conventional-commits"
-        ],
-        "settings": {
-          "terminal.integrated.shell.linux": "/bin/bash",
-          "editor.formatOnSave": true,
-          "editor.defaultFormatter": "esbenp.prettier-vscode",
-          "files.exclude": {
-            "**/node_modules": true,
-            "**/dist": true
-          }
+  "name": "Oxivos Store - Frontend DevContainer",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "vivaxy.vscode-conventional-commits"
+      ],
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/dist": true
         }
       }
-    },
-    "forwardPorts": [5173],
-    "portsAttributes": {
-      "5173": {
-        "label": "Frontend (Vite - React)",
-        "onAutoForward": "openPreview"
-      }
-    },
-    "remoteUser": "node"
-  }
+    }
+  },
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Frontend (Vite - React)",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "remoteUser": "node"
+}

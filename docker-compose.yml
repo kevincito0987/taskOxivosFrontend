@@ -1,21 +1,26 @@
-version: "3.8"
-
 services:
   app:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
     container_name: oxivos-store-frontend-dev
-    # Best Practice: Montaje optimizado con consistencia de caché para desarrollo veloz
     volumes:
       - .:/workspaces/taskOxivosFrontend:cached
-      - /var/run/docker.sock:/var/run/docker.sock
+      # Evitar montar /var/run/docker.sock salvo que sea estrictamente indispensable
+      - vscode-server:/home/node/.vscode-server
     working_dir: /workspaces
-    # Mantiene el contenedor vivo para desarrollo interactivo en VS Code
     command: sleep infinity
     environment:
       - TZ=UTC
+      - PORT=5173
+      - NODE_ENV=development
     ports:
       - "5173:5173"
-    # Best Practice: Ejecutar directamente con privilegios limitados
     user: node
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  vscode-server:
